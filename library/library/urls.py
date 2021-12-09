@@ -15,12 +15,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from authors.views import AuthorViewSet, get_view, post_view
+from rest_framework.routers import DefaultRouter, SimpleRouter
+from authors.views import AuthorViewSet, get_view, post_view, BioViewSet
 
 
-router = DefaultRouter()
+router = SimpleRouter()
 router.register('authors', AuthorViewSet)
+router.register('bios', BioViewSet)
 
 #  /authors/   GET, POST
 #  /authors/1/ GET, PUT/PATCH, DELETE
