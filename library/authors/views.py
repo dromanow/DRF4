@@ -13,19 +13,24 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.serializers import Serializer, CharField, IntegerField, ValidationError
 from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer
 from rest_framework.parsers import JSONParser
-from .serializers import AuthorModelSerializer, BioModelSerializer
+from .serializers import AuthorModelSerializer, BioModelSerializer, BookModelSerializer
 from .models import Author, Bio, Book
 
 
 class AuthorModelViewSet(ModelViewSet):
-    renderer_classes = [JSONRenderer, BrowsableAPIRenderer]
+    # renderer_classes = [JSONRenderer, BrowsableAPIRenderer]
     queryset = Author.objects.all()
     serializer_class = AuthorModelSerializer
 
 
-class BioViewSet(ModelViewSet):
+class BioModelViewSet(ModelViewSet):
     queryset = Bio.objects.all()
     serializer_class = BioModelSerializer
+
+
+class BookModelViewSet(ModelViewSet):
+    queryset = Book.objects.all()
+    serializer_class = BookModelSerializer
 
 
 # class AuthorAPIView(APIView):
@@ -70,7 +75,7 @@ class AuthorViewSet(ListModelMixin, DestroyModelMixin, GenericViewSet):
     queryset = Author.objects.all()
     serializer_class = AuthorModelSerializer
     filterset_fields = ['first_name']
-    pagination_class = Pagination
+    # pagination_class = Pagination
 
     @action(methods=['GET'], detail=True)
     def get_author_name(self, request, pk=None):
