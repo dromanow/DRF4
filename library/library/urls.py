@@ -16,6 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter, SimpleRouter
+from rest_framework.authtoken import views
 from authors.views import AuthorModelViewSet, BioModelViewSet, BookModelViewSet
 
 
@@ -33,10 +34,11 @@ router.register('books', BookModelViewSet)
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
+    path('api-auth/', include('rest_framework.urls')),
+    path('api-token-auth/', views.obtain_auth_token)
     # path('api/get/<str:name>', AuthorViewSet.as_view({'get': 'list'})),
     # path('api/get/<int:pk>/', AuthorAPIView.as_view()),
 
     # {'get': 'list'}
     # path('api/post/', post_view)
-#     я вот чет немного потерялся.. почему обращение к параметрам класса идет как обращение к параметрам инстанса? class UserViewSet(ModelViewSet): queryset = User.objects.all() def get_queryset(self,request): q = self.queryset # <- вот тут например. по идее же должно быть что-то в духе self.__cls__.queryset или UserViewSet.queryset где я что упускаю?
 ]

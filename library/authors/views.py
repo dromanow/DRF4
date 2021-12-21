@@ -13,14 +13,23 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.serializers import Serializer, CharField, IntegerField, ValidationError
 from rest_framework.renderers import JSONRenderer, BrowsableAPIRenderer
 from rest_framework.parsers import JSONParser
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, DjangoModelPermissions, BasePermission
 from .serializers import AuthorModelSerializer, BioModelSerializer, BookModelSerializer
 from .models import Author, Bio, Book
 
 
+class CustomPermission(BasePermission):
+
+    def has_permission(self, request, view):
+        return bool(request.user and request.user.is_superuser)
+
+
 class AuthorModelViewSet(ModelViewSet):
     # renderer_classes = [JSONRenderer, BrowsableAPIRenderer]
+    # permission_classes = [CustomPermission]
     queryset = Author.objects.all()
     serializer_class = AuthorModelSerializer
+    filterset_fields = ['first_name']
 
 
 class BioModelViewSet(ModelViewSet):
