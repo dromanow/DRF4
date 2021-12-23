@@ -1,14 +1,16 @@
 import React from 'react'
-import {HashRouter, BrowserRouter, Route, Routes, Link, Navigate} from 'react-router-dom'
+import {HashRouter, BrowserRouter, Route, Routes, Link, Navigate, useLocation} from 'react-router-dom'
 import AuthorList from './components/AuthorList.js'
 import BookList from './components/BookList.js'
 import AuthorBooks from './components/AuthorBooks.js'
+import LoginForm from './components/LoginForm.js'
 import axios from 'axios'
 
 
 const NotFound = () => {
+    let location = useLocation()
     return (
-        <div>Page not found</div>
+        <div>Page {location.pathname} not found</div>
     )
 }
 
@@ -17,30 +19,83 @@ class App extends React.Component {
         super(prop)
         this.state = {
             'authors': [],
-            'books': []
+            'books': [],
+            'token': ''
         }
     }
 
-    componentDidMount() {
+    get_token(login, password) {
         axios
-        .get('http://127.0.0.1:8000/api/authors/')
+        .post('http://127.0.0.1:8000/api-token-auth/', {"username": login, "password": password})
+        .then(response => {
+            const token = response.data.token
+            console.log(token)
+            localStorage.setItem('token', token)
+            this.setState({
+                'token': token
+            }, this.get_data)
+        })
+        .catch(error => console.log(error))
+    }
+
+    logout() {
+        localStorage.setItem('token', '')
+        this.setState({
+            'token': ''
+        }, this.get_data)
+    }
+
+    componentDidMount() {
+        let token = localStorage.getItem('token')
+        this.setState({
+            'token': token
+        }, this.get_data)
+    }
+
+    is_auth() {
+        return !!this.state.token
+    }
+
+    get_headers() {
+        if (this.is_auth()) {
+            return {
+                'Authorization': 'Token ' + this.state.token
+            }
+        }
+        return {}
+    }
+
+    get_data() {
+        let headers = this.get_headers()
+        axios
+        .get('http://127.0.0.1:8000/api/authors/', {headers})
         .then(response => {
             const authors = response.data
             this.setState({
                 'authors': authors
             })
         })
-        .catch(error => console.log(error))
+        .catch(error => {
+            this.setState({
+                'authors': []
+            })
+            console.log(error)
+        })
 
         axios
-        .get('http://127.0.0.1:8000/api/books/')
+        .get('http://127.0.0.1:8000/api/books/', {headers})
         .then(response => {
             const books = response.data
             this.setState({
                 'books': books
             })
         })
-        .catch(error => console.log(error))
+        .catch(error => {
+            console.log(error)
+            this.setState({
+                'books': []
+            })
+        })
     }
 
     render () {
@@ -51,11 +106,15 @@ class App extends React.Component {
                         <ul>
                             <li><Link to="/">Authors</Link> </li>
                             <li><Link to="/books">Books</Link> </li>
+                            <li>
+                            { this.is_auth() ? <button onClick={() => this.logout()}> Logout </button> : <Link to="/login">Login</Link> }
+                            </li>
                         </ul>
                     </nav>
                     <Routes>
                         <Route exact path='/' element={<AuthorList authors={this.state.authors} /> } />
                         <Route exact path='/books' element={<BookList books={this.state.books} /> } />
+                        <Route exact path='/login' element={<LoginForm get_token={(login, password) => this.get_token(login, password)}/> } />
                         <Route path="/authors" element={<Navigate to="/"/>} />
                         <Route path='/author/:id' element={<AuthorBooks books={this.state.books} /> } />
                         <Route path="*" element={<NotFound /> } />
