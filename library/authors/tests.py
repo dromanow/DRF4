@@ -60,7 +60,3 @@ class TestAuthorView(APITestCase):
         self.client.login(username='denis', password='qwerty')
         response = self.client.get('/api/bios/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-
-
-
